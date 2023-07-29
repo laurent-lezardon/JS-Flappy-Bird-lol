@@ -51,11 +51,18 @@ let barMoveX = canvas.width + barSize[0];
 // Zone horizontale de contact potentiel
 const dangerZoneBegin = birdMarginLeft + birdSize[0];
 const dangerZoneEnd = birdMarginLeft - barSize[0];
+// initialize game variables
+const initGame = () => {
+  flight = 0;
+  currentScore = 0;
+  index = 0;
+  gameover = false;
+  speed = 6.2;
+  console.log("initGame,currentScore", currentScore);
+};
 
 const render = () => {
   index++;
-
-  console.log("speed", speed);
   flyHeight = canvas.height / 2;
   // backgroung composé de deux images
   // première partie image de fond--------------
@@ -88,13 +95,15 @@ const render = () => {
     // decalage ver le haut de la barre du haut
 
     // deplacement horizontal des barres
-    barMoveX =
-      canvas.width - (((index * speed) / 2) % (canvas.width + barSize[0]));
-    // disparition barres à gauche => positionnement à droite nouvelles barres
-    if (barMoveX < -75) {
-      barPosition = -Math.floor(Math.random() * barSize[1]);
-      barMoveX = canvas.width;
+    barMoveX = canvas.width - (index * speed) / 2;
+    if (barMoveX > dangerZoneBegin) {
       round = true;
+    }
+    // disparition barres à gauche => positionnement à droite nouvelles barres
+    if (barMoveX < -barSize[0]) {
+      barPosition = -Math.floor(Math.random() * barSize[1]);
+      console.log(barPosition);
+      index = 0;
     }
     // definition de l'ordonnée basse de la barre du haut
     const endUpBarPosition = barPosition + barSize[1];
@@ -130,16 +139,21 @@ const render = () => {
         flyHeight + birdSize[1] > endUpBarPosition + spaceBetweenBars
       ) {
         chockSound.play();
+        bestScore = currentScore > bestScore ? currentScore : bestScore;
         gameover = true;
         gamePlaying = false;
         speed = 6.2;
+        console.log(currentScore);
       }
     }
     // Gestion du score courant
+
     if (barMoveX < dangerZoneEnd && round === true) {
+      console.log("one more point");
       round = false;
       scoreSound.play();
       currentScore += 1;
+      // augmentation de la vitesse après chaque point
       speed += 0.1;
     }
     flight += gravity;
@@ -153,14 +167,14 @@ const render = () => {
     if (gameover) {
       ctx.font = "bold 30px courier";
       ctx.fillText("Game Over !!!", 65, 175);
-      ctx.fillText(`Your Score : ${currentScore}`, 55, 215);
-      ctx.fillText(`Best Score : ${bestScore}`, 55, 245);
-      ctx.fillText("press any key to exit", 28, 575);
+      ctx.fillText(`Your Score : ${currentScore}`, 85, 215);
+      ctx.fillText(`Best Score : ${bestScore}`, 85, 245);
+      ctx.fillText("press any key to exit", 28, 595);
     } else {
       ctx.font = "bold 30px courier";
-      ctx.fillText(`Best Score : ${bestScore}`, 55, 245);
-      ctx.fillText("Click to play !", 48, 535);
-      ctx.fillText("press any key to exit", 28, 575);
+      ctx.fillText(`Best Score : ${bestScore}`, 85, 215);
+      ctx.fillText("Click to play !", 68, 535);
+      ctx.fillText("press any key to exit", 28, 595);
     }
     // animation flappy
     ctx.drawImage(
@@ -180,7 +194,12 @@ img.onload = render;
 
 // Gestion des évènements ========================================================
 
-document.addEventListener("click", () => (gamePlaying = true));
+document.addEventListener("click", () => {
+  if (!gamePlaying) {
+    initGame();
+    gamePlaying = true;
+  }
+});
 window.onclick = () => {
   flight += jump;
 };
@@ -188,14 +207,9 @@ window.addEventListener("keypress", (e) => {
   if (e.key !== "") {
     gamePlaying = false;
     bestScore = currentScore > bestScore ? currentScore : bestScore;
-    flight = 0;
-    currentScore = 0;
-    index = 0;
-    gameover = false;
-    let speed = 6.2;
+    initGame();
   }
 });
 
-//
 const interval = setInterval(render, 20);
 interval;
