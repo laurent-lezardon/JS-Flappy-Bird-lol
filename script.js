@@ -58,7 +58,6 @@ const initGame = () => {
   index = 0;
   gameover = false;
   speed = 6.2;
-  console.log("initGame,currentScore", currentScore);
 };
 
 const render = () => {
@@ -102,7 +101,6 @@ const render = () => {
     // disparition barres à gauche => positionnement à droite nouvelles barres
     if (barMoveX < -barSize[0]) {
       barPosition = -Math.floor(Math.random() * barSize[1]);
-      console.log(barPosition);
       index = 0;
     }
     // definition de l'ordonnée basse de la barre du haut
@@ -118,7 +116,7 @@ const render = () => {
       ...barSize
     );
     // animation flappy
-    flySound.volume = 0.1;
+    flySound.volume = 0.02;
     flySound.play();
     flight += gravity;
     flyHeight = Math.min(flyHeight + flight, canvas.height - birdSize[1]);
@@ -143,13 +141,11 @@ const render = () => {
         gameover = true;
         gamePlaying = false;
         speed = 6.2;
-        console.log(currentScore);
       }
     }
     // Gestion du score courant
 
     if (barMoveX < dangerZoneEnd && round === true) {
-      console.log("one more point");
       round = false;
       scoreSound.play();
       currentScore += 1;
